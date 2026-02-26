@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}注册 — 太鼓投稿{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card animate-in">
+        <h1>🥁 创建账户</h1>
+        <p class="subtitle">注册后即可投稿你的自制谱面</p>
+
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                <label for="username">{{ form.username.label.text }}</label>
+                {{ form.username(class="form-control", id="username", placeholder="输入用户名") }}
+                {% for error in form.username.errors %}
+                <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="email">{{ form.email.label.text }}</label>
+                {{ form.email(class="form-control", id="email", placeholder="your@email.com") }}
+                {% for error in form.email.errors %}
+                <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="password">{{ form.password.label.text }}</label>
+                {{ form.password(class="form-control", id="password", placeholder="至少6位") }}
+                {% for error in form.password.errors %}
+                <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="password2">{{ form.password2.label.text }}</label>
+                {{ form.password2(class="form-control", id="password2", placeholder="再次输入密码") }}
+                {% for error in form.password2.errors %}
+                <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.5rem;">注册</button>
+        </form>
+
+        <p class="auth-footer">
+            已有账户？<a href="{{ url_for('login') }}">立即登录</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

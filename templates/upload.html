@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}投稿谱面 — 太鼓投稿{% endblock %}
+
+{% block content %}
+<div class="container container-narrow">
+    <div class="page-header animate-in">
+        <h1>📤 投稿谱面</h1>
+        <p>上传你的 TJA 谱面文件和 OGG 音频文件</p>
+    </div>
+
+    <div class="card animate-in" style="animation-delay: 0.1s;">
+        <form method="POST" enctype="multipart/form-data" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                <label for="title">{{ form.title.label.text }}</label>
+                {{ form.title(class="form-control", id="title", placeholder="输入曲名") }}
+                {% for error in form.title.errors %}
+                <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="artist">{{ form.artist.label.text }}</label>
+                {{ form.artist(class="form-control", id="artist", placeholder="选填") }}
+                {% for error in form.artist.errors %}
+                <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="song_type">{{ form.song_type.label.text }}</label>
+                {{ form.song_type(class="form-control", id="song_type") }}
+            </div>
+
+            <div class="form-group">
+                <label>{{ form.tja_file.label.text }}</label>
+                <div class="file-upload-wrapper">
+                    {{ form.tja_file(accept=".tja") }}
+                </div>
+                {% for error in form.tja_file.errors %}
+                <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label>{{ form.ogg_file.label.text }}</label>
+                <div class="file-upload-wrapper">
+                    {{ form.ogg_file(accept=".ogg") }}
+                </div>
+                {% for error in form.ogg_file.errors %}
+                <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.5rem;">
+                🚀 提交投稿
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

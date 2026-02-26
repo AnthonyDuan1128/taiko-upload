@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}创作者社区 — 太鼓投稿{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header animate-in">
+        <h1>🌐 创作者社区</h1>
+        <p>浏览并点赞社区创作者分享的自制谱面</p>
+    </div>
+
+    {% if submissions.items %}
+    <div class="card-grid">
+        {% for sub in submissions.items %}
+        <a href="{{ url_for('submission_detail', sid=sub.id) }}" class="card animate-in"
+            style="text-decoration:none; color:inherit;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
+                <span class="card-badge badge-category">{{ sub.song_type }}</span>
+                <span style="font-size:0.75rem; color:var(--text-muted);">{{ sub.reviewed_at.strftime('%Y-%m-%d') if
+                    sub.reviewed_at else '' }}</span>
+            </div>
+            <div class="card-title">{{ sub.title }}</div>
+            {% if sub.artist %}
+            <div class="card-artist">🎵 {{ sub.artist }}</div>
+            {% endif %}
+            <div class="card-meta">
+                <span>👤 {{ sub.author.username }}</span>
+                <span>❤️ {{ sub.like_count }}</span>
+                <span>💬 {{ sub.comment_count }}</span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if submissions.pages > 1 %}
+    <div class="pagination">
+        {% if submissions.has_prev %}
+        <a href="{{ url_for('community', page=submissions.prev_num) }}">‹</a>
+        {% else %}
+        <span class="disabled">‹</span>
+        {% endif %}
+
+        {% for p in submissions.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+        <a href="{{ url_for('community', page=p) }}" class="{% if p == submissions.page %}active-page{% endif %}">{{ p
+            }}</a>
+        {% else %}
+        <span style="color:var(--text-muted);">…</span>
+        {% endif %}
+        {% endfor %}
+
+        {% if submissions.has_next %}
+        <a href="{{ url_for('community', page=submissions.next_num) }}">›</a>
+        {% else %}
+        <span class="disabled">›</span>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state animate-in">
+        <span class="icon">🎶</span>
+        <p>社区暂无谱面，快来成为第一位投稿者！</p>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('upload') }}" class="btn btn-primary">去投稿</a>
+        {% else %}
+        <a href="{{ url_for('register') }}" class="btn btn-primary">注册投稿</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

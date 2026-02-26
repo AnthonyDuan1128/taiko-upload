@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}管理员面板 — 太鼓投稿{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header animate-in">
+        <h1>⚙️ 管理员面板</h1>
+        <p>审核投稿、管理社区内容</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs animate-in" style="animation-delay:0.05s;">
+        <a href="{{ url_for('admin_panel', tab='pending') }}"
+            class="tab-link {% if tab == 'pending' %}active{% endif %}">
+            审核中
+        </a>
+        <a href="{{ url_for('admin_panel', tab='approved') }}"
+            class="tab-link {% if tab == 'approved' %}active{% endif %}">
+            已通过
+        </a>
+        <a href="{{ url_for('admin_panel', tab='rejected') }}"
+            class="tab-link {% if tab == 'rejected' %}active{% endif %}">
+            已拒绝
+        </a>
+    </div>
+
+    {% if submissions.items %}
+    <div class="table-wrapper animate-in" style="animation-delay:0.1s;">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>曲名</th>
+                    <th>投稿者</th>
+                    <th>分类</th>
+                    <th>上传时间</th>
+                    <th>文件</th>
+                    {% if tab == 'pending' %}
+                    <th>审核</th>
+                    {% else %}
+                    <th>备注</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in submissions.items %}
+                <tr>
+                    <td style="color:var(--text-muted);">#{{ sub.id }}</td>
+                    <td>
+                        <strong>{{ sub.title }}</strong>
+                        {% if sub.artist %}<br><span style="color:var(--text-muted);font-size:0.78rem;">{{ sub.artist
+                            }}</span>{% endif %}
+                    </td>
+                    <td>{{ sub.author.username }}</td>
+                    <td><span class="card-badge badge-category">{{ sub.song_type }}</span></td>
+                    <td style="font-size:0.8rem; color:var(--text-muted);">
+                        {{ sub.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    </td>
+                    <td style="font-size:0.8rem;">
+                        <a href="{{ url_for('admin_preview_file', sid=sub.id, filename=sub.tja_filename) }}"
+                            target="_blank" class="btn btn-outline btn-sm">TJA</a>
+                        <a href="{{ url_for('admin_preview_file', sid=sub.id, filename=sub.ogg_filename) }}"
+                            target="_blank" class="btn btn-outline btn-sm">OGG</a>
+                    </td>
+                    {% if tab == 'pending' %}
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="toggleReview({{ sub.id }})">审核</button>
+                        <div class="review-inline" id="review-{{ sub.id }}">
+                            <form method="POST" action="{{ url_for('admin_review', sid=sub.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <div class="form-group" style="margin-bottom:0.5rem;">
+                                    <select name="action" class="form-control"
+                                        style="font-size:0.8rem; padding:0.4rem;">
+                                        <option value="approve">✅ 通过（上传到服务器）</option>
+                                        <option value="reject">❌ 拒绝</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom:0.5rem;">
+                                    <textarea name="review_note" class="form-control" placeholder="审核备注（选填）" rows="2"
+                                        style="font-size:0.8rem; padding:0.4rem; min-height:50px;"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-success btn-sm">确认提交</button>
+                            </form>
+                        </div>
+                    </td>
+                    {% else %}
+                    <td style="font-size:0.8rem; color:var(--text-secondary); max-width:200px;">
+                        {{ sub.review_note or '—' }}
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if submissions.pages > 1 %}
+    <div class="pagination">
+        {% if submissions.has_prev %}
+        <a href="{{ url_for('admin_panel', tab=tab, page=submissions.prev_num) }}">‹</a>
+        {% else %}
+        <span class="disabled">‹</span>
+        {% endif %}
+
+        {% for p in submissions.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+        <a href="{{ url_for('admin_panel', tab=tab, page=p) }}"
+            class="{% if p == submissions.page %}active-page{% endif %}">{{ p }}</a>
+        {% else %}
+        <span style="color:var(--text-muted);">…</span>
+        {% endif %}
+        {% endfor %}
+
+        {% if submissions.has_next %}
+        <a href="{{ url_for('admin_panel', tab=tab, page=submissions.next_num) }}">›</a>
+        {% else %}
+        <span class="disabled">›</span>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state animate-in" style="animation-delay:0.1s;">
+        <span class="icon">📭</span>
+        <p>
+            {% if tab == 'pending' %}暂无待审核投稿
+            {% elif tab == 'approved' %}暂无已通过投稿
+            {% else %}暂无已拒绝投稿
+            {% endif %}
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleReview(id) {
+        const el = document.getElementById('review-' + id);
+        el.classList.toggle('open');
+    }
+</script>
+{% endblock %}

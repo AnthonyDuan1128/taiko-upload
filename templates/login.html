@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}登录 — 太鼓投稿{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card animate-in">
+        <h1>🥁 欢迎回来</h1>
+        <p class="subtitle">登录你的太鼓谱面投稿账户</p>
+
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                <label for="username">{{ form.username.label.text }}</label>
+                {{ form.username(class="form-control", id="username", placeholder="输入用户名") }}
+                {% for error in form.username.errors %}
+                <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="password">{{ form.password.label.text }}</label>
+                {{ form.password(class="form-control", id="password", placeholder="输入密码") }}
+                {% for error in form.password.errors %}
+                <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.5rem;">登录</button>
+        </form>
+
+        <p class="auth-footer">
+            没有账户？<a href="{{ url_for('register') }}">立即注册</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

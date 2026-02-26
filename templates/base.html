@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="太鼓自制谱面投稿平台 — 上传你的TJA谱面，分享给社区">
+    <title>{% block title %}太鼓谱面投稿{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="{{ url_for('community') }}" class="navbar-brand">
+            <span class="icon">🥁</span> 太鼓投稿
+        </a>
+        <div class="navbar-links">
+            <a href="{{ url_for('community') }}" class="{% if request.endpoint == 'community' %}active{% endif %}">🌐
+                社区</a>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('upload') }}" class="{% if request.endpoint == 'upload' %}active{% endif %}">📤 投稿</a>
+            <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">📋
+                我的</a>
+            {% if current_user.is_admin %}
+            <a href="{{ url_for('admin_panel') }}"
+                class="{% if request.endpoint == 'admin_panel' %}active{% endif %}">⚙️ 管理</a>
+            {% endif %}
+            <a href="{{ url_for('logout') }}">退出</a>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="{% if request.endpoint == 'login' %}active{% endif %}">登录</a>
+            <a href="{{ url_for('register') }}" class="{% if request.endpoint == 'register' %}active{% endif %}">注册</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container" id="flashContainer">
+        {% for category, message in messages %}
+        <div class="flash-msg flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Main content -->
+    {% block content %}{% endblock %}
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <p>🥁 太鼓自制谱面投稿平台 · Powered by <a href="https://taiko.asia" target="_blank">taiko.asia</a></p>
+    </footer>
+
+    <script>
+        // Auto-dismiss flash messages
+        setTimeout(() => {
+            const fc = document.getElementById('flashContainer');
+            if (fc) fc.style.transition = 'opacity 0.5s';
+            if (fc) { fc.style.opacity = '0'; setTimeout(() => fc.remove(), 500); }
+        }, 4000);
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

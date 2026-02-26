@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}{{ submission.title }} — 太鼓投稿{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:800px;">
+    <!-- Hero -->
+    <div class="detail-hero animate-in">
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem;">
+            <span class="card-badge badge-category">{{ submission.song_type }}</span>
+            <span class="card-badge badge-{{ submission.status }}">{{ submission.status_text }}</span>
+        </div>
+        <h1>{{ submission.title }}</h1>
+        {% if submission.artist %}
+        <div class="detail-artist">🎵 {{ submission.artist }}</div>
+        {% endif %}
+        <div class="detail-info">
+            <span>👤 {{ submission.author.username }}</span>
+            <span>📅 {{ submission.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            <span>❤️ {{ submission.like_count }} 赞</span>
+            <span>💬 {{ submission.comment_count }} 评论</span>
+        </div>
+        {% if submission.status == 'approved' %}
+        <div class="detail-actions">
+            {% if current_user.is_authenticated %}
+            <form method="POST" action="{{ url_for('toggle_like', sid=submission.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-like {% if user_liked %}liked{% endif %}" id="likeBtn">
+                    {% if user_liked %}❤️ 已赞{% else %}🤍 点赞{% endif %}
+                </button>
+            </form>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="btn btn-like">🤍 登录后点赞</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Comments Section -->
+    {% if submission.status == 'approved' %}
+    <div class="animate-in" style="animation-delay:0.1s;">
+        <h2 class="section-title">💬 评论区</h2>
+
+        {% if current_user.is_authenticated %}
+        <div class="card" style="margin-bottom:1.5rem;">
+            <form method="POST" action="{{ url_for('add_comment', sid=submission.id) }}" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="form-group" style="margin-bottom:0.75rem;">
+                    {{ form.content(class="form-control", placeholder="说点什么吧…（敏感词将被过滤）", rows=3) }}
+                    {% for error in form.content.errors %}
+                    <p class="form-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">发表评论</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="card" style="margin-bottom:1.5rem; text-align:center; color:var(--text-secondary); padding:1.5rem;">
+            <a href="{{ url_for('login') }}">登录</a> 后即可发表评论
+        </div>
+        {% endif %}
+
+        {% if comments %}
+        <div class="comment-list">
+            {% for c in comments %}
+            <div class="comment-item">
+                <div class="comment-header">
+                    <div class="comment-avatar">{{ c.author.username[0].upper() }}</div>
+                    <span class="comment-username">{{ c.author.username }}</span>
+                    <span class="comment-time">{{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                <div class="comment-body">{{ c.content }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:2rem;">
+            <p style="color:var(--text-muted);">还没有评论，快来抢沙发！</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}我的投稿 — 太鼓投稿{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header animate-in">
+        <h1>📋 我的投稿</h1>
+        <p>查看你的所有投稿及审核状态</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row animate-in" style="animation-delay:0.05s;">
+        {% set total = submissions.total %}
+        {% set pending = current_user.submissions.filter_by(status='pending').count() %}
+        {% set approved = current_user.submissions.filter_by(status='approved').count() %}
+        {% set rejected = current_user.submissions.filter_by(status='rejected').count() %}
+        <div class="stat-card">
+            <div class="stat-value">{{ total }}</div>
+            <div class="stat-label">总投稿</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ pending }}</div>
+            <div class="stat-label">审核中</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ approved }}</div>
+            <div class="stat-label">已通过</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ rejected }}</div>
+            <div class="stat-label">未通过</div>
+        </div>
+    </div>
+
+    {% if submissions.items %}
+    <div class="table-wrapper animate-in" style="animation-delay:0.1s;">
+        <table>
+            <thead>
+                <tr>
+                    <th>曲名</th>
+                    <th>分类</th>
+                    <th>状态</th>
+                    <th>上传时间</th>
+                    <th>审核备注</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in submissions.items %}
+                <tr>
+                    <td>
+                        <strong>{{ sub.title }}</strong>
+                        {% if sub.artist %}<br><span style="color:var(--text-muted);font-size:0.78rem;">{{ sub.artist
+                            }}</span>{% endif %}
+                    </td>
+                    <td><span class="card-badge badge-category">{{ sub.song_type }}</span></td>
+                    <td>
+                        <span class="card-badge badge-{{ sub.status }}">{{ sub.status_text }}</span>
+                    </td>
+                    <td style="font-size:0.8rem; color:var(--text-muted);">
+                        {{ sub.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    </td>
+                    <td style="font-size:0.8rem; color:var(--text-secondary); max-width:200px;">
+                        {{ sub.review_note or '—' }}
+                    </td>
+                    <td>
+                        {% if sub.status == 'pending' %}
+                        <form method="POST" action="{{ url_for('cancel_submission', sid=sub.id) }}"
+                            style="display:inline;" onsubmit="return confirm('确定取消此投稿？')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-danger btn-sm">取消</button>
+                        </form>
+                        {% elif sub.status == 'approved' %}
+                        <a href="{{ url_for('submission_detail', sid=sub.id) }}" class="btn btn-outline btn-sm">查看</a>
+                        {% else %}
+                        <span style="color:var(--text-muted);">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if submissions.pages > 1 %}
+    <div class="pagination">
+        {% if submissions.has_prev %}
+        <a href="{{ url_for('dashboard', page=submissions.prev_num) }}">‹</a>
+        {% else %}
+        <span class="disabled">‹</span>
+        {% endif %}
+
+        {% for p in submissions.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+        <a href="{{ url_for('dashboard', page=p) }}" class="{% if p == submissions.page %}active-page{% endif %}">{{ p
+            }}</a>
+        {% else %}
+        <span style="color:var(--text-muted);">…</span>
+        {% endif %}
+        {% endfor %}
+
+        {% if submissions.has_next %}
+        <a href="{{ url_for('dashboard', page=submissions.next_num) }}">›</a>
+        {% else %}
+        <span class="disabled">›</span>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state animate-in" style="animation-delay:0.1s;">
+        <span class="icon">📭</span>
+        <p>你还没有投稿过谱面</p>
+        <a href="{{ url_for('upload') }}" class="btn btn-primary">去投稿</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
