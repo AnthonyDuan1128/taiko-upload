@@ -330,6 +330,30 @@ def create_app():
         upload_dir = os.path.join(app.config['UPLOAD_FOLDER'], str(sid))
         return send_from_directory(upload_dir, filename)
 
+    # ── Public download (approved submissions only) ────────────────────
+
+    @app.route('/download/<int:sid>/<filetype>')
+    def download_file(sid, filetype):
+        sub = db.session.get(Submission, sid)
+        if sub is None or sub.status != Submission.STATUS_APPROVED:
+            abort(404)
+        if filetype == 'tja':
+            filename = sub.tja_filename
+            dl_name = f'{sub.title}.tja'
+        elif filetype == 'ogg':
+            filename = sub.ogg_filename
+            dl_name = f'{sub.title}.ogg'
+        else:
+            abort(404)
+        upload_dir = os.path.join(app.config['UPLOAD_FOLDER'], str(sid))
+        if not os.path.isfile(os.path.join(upload_dir, filename)):
+            abort(404)
+        return send_from_directory(
+            upload_dir, filename,
+            as_attachment=True,
+            download_name=dl_name,
+        )
+
     return app
 
 

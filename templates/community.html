@@ -27,6 +27,13 @@
                 <span>❤️ {{ sub.like_count }}</span>
                 <span>💬 {{ sub.comment_count }}</span>
             </div>
+            <div style="display:flex; gap:0.5rem; margin-top:0.75rem;"
+                onclick="event.stopPropagation(); event.preventDefault();">
+                <a href="{{ url_for('download_file', sid=sub.id, filetype='tja') }}" class="btn btn-outline btn-sm"
+                    onclick="event.stopPropagation();">📄 TJA</a>
+                <a href="{{ url_for('download_file', sid=sub.id, filetype='ogg') }}" class="btn btn-outline btn-sm"
+                    onclick="event.stopPropagation();">🎵 OGG</a>
+            </div>
         </a>
         {% endfor %}
     </div>

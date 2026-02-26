@@ -21,6 +21,10 @@
         </div>
         {% if submission.status == 'approved' %}
         <div class="detail-actions">
+            <a href="{{ url_for('download_file', sid=submission.id, filetype='tja') }}" class="btn btn-outline">📄 下载
+                TJA</a>
+            <a href="{{ url_for('download_file', sid=submission.id, filetype='ogg') }}" class="btn btn-outline">🎵 下载
+                OGG</a>
             {% if current_user.is_authenticated %}
             <form method="POST" action="{{ url_for('toggle_like', sid=submission.id) }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
